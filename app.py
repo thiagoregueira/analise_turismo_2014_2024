@@ -208,15 +208,27 @@ elif pagina == 'Por Estado':
 
 elif pagina == 'Temporal':
     st.title('Análise Temporal')
-    
+
     # Análise anual
     col1, col2 = st.columns(2)
     with col1:
         st.subheader('Total de Turistas por Ano')
         turistas_por_ano = df.groupby('ano').size().reset_index(name='total_turistas')
         # Definindo a paleta de cores personalizada
-        custom_colors = ['#1a0f3c', '#46287c', '#42277a', '#5e3a8c', '#744c9e', '#895eaf', '#e67e22', '#f39c12', '#f1c40f', '#ffd700', '#ffeb99']
-        
+        custom_colors = [
+            '#1a0f3c',
+            '#46287c',
+            '#42277a',
+            '#5e3a8c',
+            '#744c9e',
+            '#895eaf',
+            '#e67e22',
+            '#f39c12',
+            '#f1c40f',
+            '#ffd700',
+            '#ffeb99',
+        ]
+
         fig_anual = px.bar(
             turistas_por_ano,
             x='ano',
@@ -224,20 +236,22 @@ elif pagina == 'Temporal':
             title='Total de Turistas por Ano',
             template=CHART_STYLE['template'],
             color='ano',  # Usar o ano como base para a cor
-            color_discrete_sequence=custom_colors  # Usar nossa paleta personalizada
+            color_discrete_sequence=custom_colors,  # Usar nossa paleta personalizada
         )
         fig_anual.update_layout(
             title=dict(
                 text='Total de Turistas por Ano',
                 font=dict(size=CHART_STYLE['title']['font_size'], family=CHART_STYLE['title']['font_family']),
             ),
-            xaxis=dict(title='Ano', gridcolor=CHART_STYLE['axis']['gridcolor'], showgrid=CHART_STYLE['axis']['showgrid']),
+            xaxis=dict(
+                title='Ano', gridcolor=CHART_STYLE['axis']['gridcolor'], showgrid=CHART_STYLE['axis']['showgrid']
+            ),
             yaxis=dict(
                 title='Total de Turistas',
                 gridcolor=CHART_STYLE['axis']['gridcolor'],
                 showgrid=CHART_STYLE['axis']['showgrid'],
             ),
-            showlegend=False  # Remover a legenda
+            showlegend=False,  # Remover a legenda
         )
         st.plotly_chart(fig_anual, use_container_width=True)
 
