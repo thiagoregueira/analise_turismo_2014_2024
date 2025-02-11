@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 import streamlit as st
 from sklearn.linear_model import LinearRegression
 
-# Configuração da página
 st.set_page_config(
     page_title='Dashboard Turismo Brasil - 2014 a 2024',
     layout='wide',
@@ -13,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state='expanded',
 )
 
-# Definindo paletas de cores mais diversificadas
+
 COLOR_PALETTE = {
     'primary': '#1f77b4',
     'secondary': '#2ecc71',
@@ -22,7 +21,7 @@ COLOR_PALETTE = {
     'region_colors': px.colors.qualitative.Set1,
 }
 
-# Estilo base para todos os gráficos
+
 CHART_STYLE = {
     'template': 'plotly_white',
     'title': {'font_size': 24, 'font_family': 'Arial'},
@@ -30,14 +29,11 @@ CHART_STYLE = {
 }
 
 
-# Carregando os dados
 @st.cache_data
 def load_data():
     df = pd.read_csv('df_turismo_all.csv')
-    # Converter mes_ano para datetime
     df['mes_ano'] = pd.to_datetime(df['mes_ano'])
 
-    # Padronizar os nomes dos meses
     meses_map = {
         'janeiro': 'Janeiro',
         'Janeiro': 'Janeiro',
@@ -72,14 +68,13 @@ def load_data():
 
 df = load_data()
 
-# Sidebar para navegação
+
 st.sidebar.title('Análises')
 pagina = st.sidebar.radio('Selecione a página:', ['Geral', 'Por Regiões', 'Por Estado', 'Temporal', 'Previsões'])
 
 if pagina == 'Geral':
     st.title('Análise Geral do Turismo no Brasil - 2014 a 2024')
 
-    # Total de turistas por ano
     turistas_por_ano = df.groupby('ano').size().reset_index(name='total_turistas')
     fig_total = px.line(
         turistas_por_ano,
@@ -103,7 +98,6 @@ if pagina == 'Geral':
     )
     st.plotly_chart(fig_total)
 
-    # Top 10 países de origem (excluindo "Outros países")
     top_paises = df[df['pais'] != 'Outros países'].groupby('pais').size().sort_values(ascending=False).head(10)
     fig_paises = px.bar(
         x=top_paises.index,
@@ -127,7 +121,6 @@ if pagina == 'Geral':
     )
     st.plotly_chart(fig_paises)
 
-    # Distribuição por via de chegada
     via_chegada = df.groupby('via').size().reset_index(name='total')
     fig_via = px.pie(
         via_chegada,
@@ -148,7 +141,6 @@ if pagina == 'Geral':
 elif pagina == 'Por Regiões':
     st.title('Análise por Regiões do Brasil')
 
-    # Total por região (ordenado do maior para o menor)
     turistas_por_regiao = df.groupby('regiao').size().reset_index(name='total_turistas')
     turistas_por_regiao = turistas_por_regiao.sort_values('total_turistas', ascending=False)
 
@@ -182,7 +174,6 @@ elif pagina == 'Por Estado':
     estado = st.selectbox('Selecione o Estado:', df['uf'].unique())
     estado_df = df[df['uf'] == estado]
 
-    # Agrupar por ano para o estado selecionado
     estado_ano = estado_df.groupby('ano').size().reset_index(name='total_turistas')
     fig_estado = px.line(
         estado_ano,
@@ -206,19 +197,13 @@ elif pagina == 'Por Estado':
     )
     st.plotly_chart(fig_estado)
 
-    # Adicionar gráfico dos top 10 estados
     st.subheader('Top 10 Estados que Mais Receberam Turistas')
 
-    # Calcular o total de turistas por estado
     top_estados = df[df['uf'] != 'Outras Unidades da Federação'].groupby('uf').size().reset_index(name='total_turistas')
-    top_estados = top_estados.sort_values('total_turistas', ascending=False).head(
-        10
-    )  # Pegando os 10 maiores em ordem decrescente
+    top_estados = top_estados.sort_values('total_turistas', ascending=False).head(10)
 
-    # Criar paleta de cores para os estados
     cores_estados = px.colors.qualitative.Set3[:10]
 
-    # Criar gráfico de barras horizontal
     fig_top_estados = px.bar(
         top_estados,
         x='total_turistas',
@@ -251,12 +236,11 @@ elif pagina == 'Por Estado':
 elif pagina == 'Temporal':
     st.title('Análise Temporal')
 
-    # Análise anual
     col1, col2 = st.columns(2)
     with col1:
         st.subheader('Total de Turistas por Ano')
         turistas_por_ano = df.groupby('ano').size().reset_index(name='total_turistas')
-        # Definindo a paleta de cores personalizada
+
         custom_colors = [
             '#1a0f3c',
             '#46287c',
@@ -299,7 +283,7 @@ elif pagina == 'Temporal':
 
     with col2:
         st.subheader('Análise Mensal')
-        # Criar um mapeamento para ordenar os meses corretamente
+
         ordem_meses = {
             'Janeiro': 1,
             'Fevereiro': 2,
@@ -326,7 +310,7 @@ elif pagina == 'Temporal':
             y='total_turistas',
             title='Total de Turistas por Mês (Todos os Anos)',
             template=CHART_STYLE['template'],
-            color='mes',  # Usar o nome do mês como base para as cores
+            color='mes',
             color_discrete_sequence=COLOR_PALETTE['sequential'],
             category_orders={'mes': sorted(df['mes'].unique(), key=lambda x: ordem_meses.get(x, 13))},
         )
@@ -383,12 +367,10 @@ elif pagina == 'Temporal':
 else:  # Previsões
     st.title('Previsões de Turismo')
 
-    # Preparando dados para previsão
     anos_df = df.groupby('ano').size().reset_index(name='total_turistas')
     X = anos_df['ano'].values.reshape(-1, 1)
     y = anos_df['total_turistas'].values
 
-    # Treinando modelo
     model = LinearRegression()
     model.fit(X, y)
 
