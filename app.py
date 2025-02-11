@@ -18,8 +18,8 @@ COLOR_PALETTE = {
     'primary': '#1f77b4',
     'secondary': '#2ecc71',
     'accent': '#e74c3c',
-    'sequential': px.colors.qualitative.Set3,  # Paleta com várias cores diferentes
-    'region_colors': px.colors.qualitative.Set1,  # Paleta específica para regiões
+    'sequential': px.colors.qualitative.Set3,
+    'region_colors': px.colors.qualitative.Set1,
 }
 
 # Estilo base para todos os gráficos
@@ -110,7 +110,7 @@ if pagina == 'Geral':
         y=top_paises.values,
         title='Top 10 Países de Origem dos Turistas',
         template=CHART_STYLE['template'],
-        color=top_paises.index,  # Usar o nome do país como base para as cores
+        color=top_paises.index,
         color_discrete_sequence=COLOR_PALETTE['sequential'],
     )
     fig_paises.update_layout(
@@ -157,7 +157,7 @@ elif pagina == 'Por Regiões':
         y=turistas_por_regiao['total_turistas'],
         title='Distribuição de Turistas por Região',
         template=CHART_STYLE['template'],
-        color=turistas_por_regiao['regiao'],  # Usar o nome da região como base para as cores
+        color=turistas_por_regiao['regiao'],
         color_discrete_sequence=COLOR_PALETTE['region_colors'],
     )
     fig_regiao.update_layout(
@@ -206,6 +206,48 @@ elif pagina == 'Por Estado':
     )
     st.plotly_chart(fig_estado)
 
+    # Adicionar gráfico dos top 10 estados
+    st.subheader('Top 10 Estados que Mais Receberam Turistas')
+
+    # Calcular o total de turistas por estado
+    top_estados = df[df['uf'] != 'Outras Unidades da Federação'].groupby('uf').size().reset_index(name='total_turistas')
+    top_estados = top_estados.sort_values('total_turistas', ascending=False).head(
+        10
+    )  # Pegando os 10 maiores em ordem decrescente
+
+    # Criar paleta de cores para os estados
+    cores_estados = px.colors.qualitative.Set3[:10]
+
+    # Criar gráfico de barras horizontal
+    fig_top_estados = px.bar(
+        top_estados,
+        x='total_turistas',
+        y='uf',
+        orientation='h',
+        title='Top 10 Estados com Maior Fluxo de Turistas',
+        template=CHART_STYLE['template'],
+        color='uf',
+        color_discrete_sequence=cores_estados,
+    )
+
+    fig_top_estados.update_layout(
+        title=dict(
+            text='Top 10 Estados com Maior Fluxo de Turistas',
+            font=dict(size=CHART_STYLE['title']['font_size'], family=CHART_STYLE['title']['font_family']),
+        ),
+        xaxis=dict(
+            title='Total de Turistas',
+            gridcolor=CHART_STYLE['axis']['gridcolor'],
+            showgrid=CHART_STYLE['axis']['showgrid'],
+        ),
+        yaxis=dict(
+            title='Estado', gridcolor=CHART_STYLE['axis']['gridcolor'], showgrid=CHART_STYLE['axis']['showgrid']
+        ),
+        showlegend=False,
+    )
+
+    st.plotly_chart(fig_top_estados)
+
 elif pagina == 'Temporal':
     st.title('Análise Temporal')
 
@@ -235,8 +277,8 @@ elif pagina == 'Temporal':
             y='total_turistas',
             title='Total de Turistas por Ano',
             template=CHART_STYLE['template'],
-            color='ano',  # Usar o ano como base para a cor
-            color_discrete_sequence=custom_colors,  # Usar nossa paleta personalizada
+            color='ano',
+            color_discrete_sequence=custom_colors,
         )
         fig_anual.update_layout(
             title=dict(
@@ -251,7 +293,7 @@ elif pagina == 'Temporal':
                 gridcolor=CHART_STYLE['axis']['gridcolor'],
                 showgrid=CHART_STYLE['axis']['showgrid'],
             ),
-            showlegend=False,  # Remover a legenda
+            showlegend=False,
         )
         st.plotly_chart(fig_anual, use_container_width=True)
 
